@@ -49,3 +49,4 @@ do
 		xmlstarlet ed --inplace -r "rc:ReportRule/rc:RuleFailureTmp" -v "RuleFailure" report_CNE_02000.xml
 	fi
 done
+rm -r `echo $kiss2array| tr '\n' ' '`
