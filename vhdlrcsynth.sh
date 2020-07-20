@@ -8,27 +8,16 @@ generate_xml_report () {
 	</rc:ReportRule>' > $1
 }
 
-add_issue (){
-	linenumber=$(echo $line | cut -d : -f 1)
-	xmlstarlet ed --inplace --subnode "rc:ReportRule" --type elem -n 'rc:RuleFailureTmp' $1
-	xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:File' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Line' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Entity' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Architecture' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:STD_03900' $1
-	xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900" --type elem -n 'rc:SonarQubeMsg' $1
-	xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg" --type elem -n 'rc:SonarError' --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg" --type elem -n 'rc:SonarRemediationMsg' $1
-	xmlstarlet ed --inplace -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Line' -v "$linenumber"  -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Entity' -v "$modulename" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:File' -v "$file" -u '/rc:ReportRule/rc:ExecutionDate' -v "`date`" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg/rc:SonarError' -v "State machine signal $statename uses wrong type." -u '/rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg/rc:SonarRemediationMsg' -v "Use enumerated type instead." $1 
-	xmlstarlet ed --inplace -r "rc:ReportRule/rc:RuleFailureTmp" -v "RuleFailure" $1
-}
-
 files_regex=".*\.\(vhdl\|vhd\)"
-cne_2900="report_CNE_02000.xml"
-std_3900="report_STD_03900.xml"
+cne_02000="report_CNE_02000.xml"
+std_03900="report_STD_03900.xml"
 
-ghdl -a `find ./ -regex $files_regex| tr '\n' ' '`
-yosys $MODULE -m ghdl -p "ghdl $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+yosys $MODULE -m ghdl -p "ghdl `find ./ -regex $files_regex| tr '\n' ' '` -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
 
 kiss2array=$(find ./ -regex .*\.kiss2)
 
-generate_xml_report $cne_2900
-generate_xml_report $std_3900
+generate_xml_report $cne_02000 
+generate_xml_report $std_03900
 
 for kiss2 in $kiss2array
 do
@@ -41,11 +30,24 @@ do
 	statetype=$(echo $line | cut -d : -f 3)
 	if [[ `echo $statetype` == std* ]]||[[ `echo $statetype` == ieee* ]]
 	then
-		add_issue $cne_2900
+		linenumber=$(echo $line | cut -d : -f 1)
+		xmlstarlet ed --inplace --subnode "rc:ReportRule" --type elem -n 'rc:RuleFailureTmp' report_STD_03900.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:File' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Line' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Entity' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Architecture' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:STD_03900' report_STD_03900.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900" --type elem -n 'rc:SonarQubeMsg' report_STD_03900.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg" --type elem -n 'rc:SonarError' --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg" --type elem -n 'rc:SonarRemediationMsg' report_STD_03900.xml
+		xmlstarlet ed --inplace -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Line' -v "$linenumber"  -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Entity' -v "$modulename" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:File' -v "$file" -u '/rc:ReportRule/rc:ExecutionDate' -v "`date`" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg/rc:SonarError' -v "State machine signal $statename uses wrong type." -u '/rc:ReportRule/rc:RuleFailureTmp/rc:STD_03900/rc:SonarQubeMsg/rc:SonarRemediationMsg' -v "Use enumerated type instead." report_STD_03900.xml 
+		xmlstarlet ed --inplace -r "rc:ReportRule/rc:RuleFailureTmp" -v "RuleFailure" report_STD_03900.xml
 	fi
+
 	if [[ ! $statename =~ $2 ]]
 	then
-		add_issue $std_3900
+		linenumber=$(echo $line | cut -d : -f 1)
+		xmlstarlet ed --inplace --subnode "rc:ReportRule" --type elem -n 'rc:RuleFailureTmp' report_CNE_02000.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:File' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Line' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Entity' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:Architecture' --subnode "rc:ReportRule/rc:RuleFailureTmp" --type elem -n 'rc:CNE_02000' report_CNE_02000.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:CNE_02000" --type elem -n 'rc:SonarQubeMsg' report_CNE_02000.xml
+		xmlstarlet ed --inplace --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:CNE_02000/rc:SonarQubeMsg" --type elem -n 'rc:SonarError' --subnode "rc:ReportRule/rc:RuleFailureTmp/rc:CNE_02000/rc:SonarQubeMsg" --type elem -n 'rc:SonarRemediationMsg' report_CNE_02000.xml
+		xmlstarlet ed --inplace -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Line' -v "$linenumber"  -u '/rc:ReportRule/rc:RuleFailureTmp/rc:Entity' -v "$modulename" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:File' -v "$file" -u '/rc:ReportRule/rc:ExecutionDate' -v "`date`" -u '/rc:ReportRule/rc:RuleFailureTmp/rc:CNE_02000/rc:SonarQubeMsg/rc:SonarError' -v "State machine $statename is miswritten." -u '/rc:ReportRule/rc:RuleFailureTmp/rc:CNE_02000/rc:SonarQubeMsg/rc:SonarRemediationMsg' -v "Change signal name $statename to comply with $2" report_CNE_02000.xml 
+		xmlstarlet ed --inplace -r "rc:ReportRule/rc:RuleFailureTmp" -v "RuleFailure" report_CNE_02000.xml
 	fi
 done
 

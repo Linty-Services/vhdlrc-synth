@@ -1,5 +1,5 @@
--- A Moore machine's outputs are dependent only on the current fsm_state_moore.
--- The output is written only when the fsm_state_moore changes.  (fsm_state_moore
+-- A Moore machine's outputs are dependent only on the current sm_state_moore.
+-- The output is written only when the sm_state_moore changes.  (sm_state_moore
 -- transitions are synchronous.)
 
 library ieee;
@@ -18,53 +18,53 @@ end entity;
 
 architecture rtl of moore_4s is
 
-	-- Build an enumerated type for the fsm_state_moore machine
-	type fsm_state_moore_type is (s0, s1, s2, s3);
+	-- Build an enumerated type for the sm_state_moore machine
+	type sm_state_moore_type is (s0, s1, s2, s3);
 	
-	-- Register to hold the current fsm_state_moore
-	signal fsm_state_moore   : fsm_state_moore_type;
+	-- Register to hold the current sm_state_moore
+	signal sm_state_moore   : sm_state_moore_type;
 
 begin
-	-- Logic to advance to the next fsm_state_moore
+	-- Logic to advance to the next sm_state_moore
 	process (clk, reset)
 	begin
 		if reset = '1' then
-			fsm_state_moore <= s0;
+			sm_state_moore <= s0;
 		elsif (rising_edge(clk)) then
-			case fsm_state_moore is
+			case sm_state_moore is
 				when s0=>
 					if data_in = '1' then
-						fsm_state_moore <= s1;
+						sm_state_moore <= s1;
 					else
-						fsm_state_moore <= s0;
+						sm_state_moore <= s0;
 					end if;
 				when s1=>
 					if data_in = '1' then
-						fsm_state_moore <= s2;
+						sm_state_moore <= s2;
 					else
-						fsm_state_moore <= s1;
+						sm_state_moore <= s1;
 					end if;
 				when s2=>
 					if data_in = '1' then
-						fsm_state_moore <= s3;
+						sm_state_moore <= s3;
 					else
-						fsm_state_moore <= s2;
+						sm_state_moore <= s2;
 					end if;
 				when s3 =>
 					if data_in = '1' then
-						fsm_state_moore <= s0;
+						sm_state_moore <= s0;
 					else
-						fsm_state_moore <= s3;
+						sm_state_moore <= s3;
 					end if;
 			end case;
 		end if;
 	end process;
 	
-	-- Output depends solely on the current fsm_state_moore
-	process (fsm_state_moore)
+	-- Output depends solely on the current sm_state_moore
+	process (sm_state_moore)
 	begin
 	
-		case fsm_state_moore is
+		case sm_state_moore is
 			when s0 =>
 				data_out <= "00";
 			when s1 =>

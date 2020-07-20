@@ -21,7 +21,7 @@ architecture rtl of user_encod is
 	type count_state is (zero, one, two, three);
 	
 	-- Registers to hold the current state and the next state
-	signal fsm_present_state, next_state	   : count_state;
+	signal sm_present_state, next_state	   : count_state;
 	
 	-- Attribute to declare a specific encoding for the states
 	attribute syn_encoding				  : string;
@@ -30,9 +30,9 @@ architecture rtl of user_encod is
 begin
 	
 	-- Determine what the next state will be, and set the output bits
-	process (fsm_present_state, updown)
+	process (sm_present_state, updown)
 	begin
-		case fsm_present_state is
+		case sm_present_state is
 			when zero =>
 				if (updown = '0') then
 					next_state <= one;
@@ -80,7 +80,7 @@ begin
 	process
 	begin
 		wait until rising_edge(clock);
-		fsm_present_state <= next_state;
+		sm_present_state <= next_state;
 	end process;
 	
 end rtl;

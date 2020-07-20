@@ -14,53 +14,53 @@ end entity;
 
 architecture rtl of safe_state is
 	
-	-- Build an enumerated type for the fsm_state machine
+	-- Build an enumerated type for the sm_state machine
 	type state_type is (s0, s1, s2);
 	
-	-- Register to hold the current fsm_state
-	signal fsm_state   : state_type;
+	-- Register to hold the current sm_state
+	signal sm_state   : state_type;
 	
-	-- Attribute "safe" implements a safe fsm_state machine.
-	-- This is a fsm_state machine that can recover from an
-	-- illegal fsm_state (by returning to the reset fsm_state).
+	-- Attribute "safe" implements a safe sm_state machine.
+	-- This is a sm_state machine that can recover from an
+	-- illegal sm_state (by returning to the reset sm_state).
 	attribute syn_encoding : string;
 	attribute syn_encoding of state_type : type is "safe";
 	
 begin
 
-	-- Logic to advance to the next fsm_state
+	-- Logic to advance to the next sm_state
 	process (clk, reset)
 	begin
 		if reset = '1' then
-			fsm_state <= s0;
+			sm_state <= s0;
 		elsif (rising_edge(clk)) then
-			case fsm_state is
+			case sm_state is
 				when s0=>
 					if data_in = '1' then
-						fsm_state <= s1;
+						sm_state <= s1;
 					else
-						fsm_state <= s0;
+						sm_state <= s0;
 					end if;
 				when s1=>
 					if data_in = '1' then
-						fsm_state <= s2;
+						sm_state <= s2;
 					else
-						fsm_state <= s1;
+						sm_state <= s1;
 					end if;
 				when s2=>
 					if data_in = '1' then
-						fsm_state <= s0;
+						sm_state <= s0;
 					else
-						fsm_state <= s2;
+						sm_state <= s2;
 					end if;
 			end case;
 		end if;
 	end process;
 	
 	-- Logic to determine output
-	process (fsm_state)
+	process (sm_state)
 	begin
-		case fsm_state is
+		case sm_state is
 			when s0 =>
 				data_out <= "00";
 			when s1 =>
