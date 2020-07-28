@@ -3,7 +3,7 @@ generate_xml_report () {
 	echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 	<rc:ReportRule xmlns:rc="RULECHECKER" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<rc:RuleCheckerVersion>RC-Synth-1.00</rc:RuleCheckerVersion>
-	<rc:RuleName>CNE_02000</rc:RuleName>
+	<rc:RuleName>'$2'</rc:RuleName>
 	<rc:ExecutionDate></rc:ExecutionDate>
 	</rc:ReportRule>' > $1
 }
@@ -16,8 +16,8 @@ yosys $MODULE -m ghdl -p "ghdl `find ./ -regex $files_regex| tr '\n' ' '` -e $1;
 
 kiss2array=$(find ./ -regex .*\.kiss2)
 
-generate_xml_report $cne_02000 
-generate_xml_report $std_03900
+generate_xml_report $cne_02000 "CNE_02000"
+generate_xml_report $std_03900 "STD_03900"
 
 for kiss2 in $kiss2array
 do
