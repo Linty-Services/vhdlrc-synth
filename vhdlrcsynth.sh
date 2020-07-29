@@ -7,12 +7,18 @@ generate_xml_report () {
 	<rc:ExecutionDate></rc:ExecutionDate>
 	</rc:ReportRule>' > $1
 }
-
 files_regex=".*\.\(vhdl\|vhd\)"
+
 cne_02000="report_CNE_02000.xml"
 std_03900="report_STD_03900.xml"
 
-yosys $MODULE -m ghdl -p "ghdl `find ./ -regex $files_regex| tr '\n' ' '` -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+if [ -z $3 ]
+	then
+	yosys $MODULE -m ghdl -p "ghdl `find ./ -regex $files_regex| tr '\n' ' '` -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+	else
+	files=${@:3}
+	yosys $MODULE -m ghdl -p "ghdl ""$files"" -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+	fi
 
 kiss2array=$(find ./ -regex .*\.kiss2)
 
