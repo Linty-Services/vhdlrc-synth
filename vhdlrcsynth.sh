@@ -12,13 +12,18 @@ files_regex=".*\.\(vhdl\|vhd\)"
 cne_02000="report_CNE_02000.xml"
 std_03900="report_STD_03900.xml"
 
+ghdl --clean
 if [ -z $3 ]
 	then
-	yosys $MODULE -m ghdl -p "ghdl `find ./ -regex $files_regex| tr '\n' ' '` -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+	ghdl -a `find ./ -regex $files_regex| tr '\n' ' '`
 	else
 	files=${@:3}
-	yosys $MODULE -m ghdl -p "ghdl ""$files"" -e $1; setattr -set fsm_encoding \"auto\" ; fsm -norecode -nomap -export"
+	ghdl -a $files
 	fi
+ghdl -e $1
+
+yosys -m ghdl -p "ghdl; setattr -set fsm_encoding \"auto\"; fsm -norecode -nomap -export"
+	
 
 kiss2array=$(find ./ -regex .*\.kiss2)
 
